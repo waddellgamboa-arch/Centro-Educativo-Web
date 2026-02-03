@@ -13,8 +13,10 @@ require_once 'includes/auth.php';
 if (estaAutenticado()) {
     if (esAdmin()) {
         header('Location: index.php');
-    } else {
+    } elseif (esProfesor()) {
         header('Location: profesor_panel.php');
+    } else {
+        header('Location: estudiante_panel.php');
     }
     exit();
 }
@@ -37,8 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Redirigir segun rol
             if ($usuario['rol'] === 'admin') {
                 header('Location: index.php');
-            } else {
+            } elseif ($usuario['rol'] === 'profesor') {
                 header('Location: profesor_panel.php');
+            } else {
+                header('Location: estudiante_panel.php');
             }
             exit();
         } else {

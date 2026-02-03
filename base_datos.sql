@@ -17,10 +17,13 @@ CREATE TABLE usuarios (
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     nombre_completo VARCHAR(150) NOT NULL,
-    rol ENUM('admin', 'profesor') NOT NULL DEFAULT 'profesor',
+    rol ENUM('admin', 'profesor', 'estudiante') NOT NULL DEFAULT 'profesor',
     email VARCHAR(100),
+    id_estudiante INT DEFAULT NULL,
     activo TINYINT(1) DEFAULT 1,
-    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_usuario_estudiante FOREIGN KEY (id_estudiante)
+        REFERENCES estudiantes(id_estudiante) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
 -- Usuarios por defecto (password: admin123 y profesor123)

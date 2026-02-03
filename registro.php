@@ -39,10 +39,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             // Hashear contraseña
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
-            $rol = 'profesor'; // Por defecto todos son profesores
+            $rol = 'profesor'; 
+            $id_estudiante = null;
+
+            // Lógica de Registro Inteligente
+            if (str_ends_with($email, '@alumno.centro.edu')) {
+                $rol = 'estudiante';
+                
+                // Buscar si ya existe el estudiante en la tabla 'estudiantes'
+                $stmt_estu = $conexion->prepare("SELECT id_estudiante FROM estudiantes WHERE email = ?");
+                $stmt_estu->bind_param("s", $email);
+                $stmt_estu->execute();
+                $resultado_estu = $stmt_estu->get_result();
+                
+                if ($resultado_estu->num_rows > 0) {
+                    $estudiante = $resultado_estu->fetch_assoc();
+                    $id_estudiante = $estudiante['id_estudiante'];
+                } else {
+                    // Si no existe, creamos un registro básico en la tabla estudiantes
+                    // (Los apellidos se separan del nombre completo de forma básica)
+                    $partes_nombre = explode(' ', $nombre_completo, 2);
+                    $nom = $partes_nombre[0];
+                    $ape = $partes_nombre[1] ?? '';
+                    $fecha_hoy = date('Y-m-d');
+                    
+                    $stmt_ins_estu = $conexion->prepare("INSERT INTO estudiantes (nombre, apellidos, email, fecha_matricula) VALUES (?, ?, ?, ?)");
+                    $stmt_ins_estu->bind_param("ssss", $nom, $ape, $email, $fecha_hoy);
+                    $stmt_ins_estu->execute();
+                    $id_estudiante = $conexion->insert_id;
+                }
+            }
             
-            $stmt = $conexion->prepare("INSERT INTO usuarios (username, password, nombre_completo, email, rol) VALUES (?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssss", $username, $password_hash, $nombre_completo, $email, $rol);
+            $stmt = $conexion->prepare("INSERT INTO usuarios (username, password, nombre_completo, email, rol, id_estudiante) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssssi", $username, $password_hash, $nombre_completo, $email, $rol, $id_estudiante);
             
             if ($stmt->execute()) {
                 $exito = 'Cuenta creada con éxito. Ya puedes iniciar sesión.';

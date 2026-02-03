@@ -3,8 +3,11 @@
 require_once 'includes/conexion.php';
 require_once 'includes/auth.php';
 
-// Solo admin puede acceder
-requiereAdmin();
+// Solo admin y estudiante pueden acceder (pero solo admin puede gestionar)
+if (!esAdmin() && !esEstudiante()) {
+    header('Location: login.php');
+    exit();
+}
 
 
 $accion = isset($_GET['accion']) ? $_GET['accion'] : 'listar';
@@ -76,7 +79,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['crear'])) {
             <?php if ($accion === 'listar'): ?>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
                     <h2 class="glow-text" style="font-size: 2.2rem; margin-bottom: 0;"><span>👨‍🏫</span> Directorio del Claustro</h2>
-                    <a href="?accion=crear" class="btn btn-primary" style="background: var(--c-secondary); border: none; font-weight: 700;">➕ ALTA DOCENTE</a>
+                    <?php if (esAdmin()): ?>
+                        <a href="?accion=crear" class="btn btn-primary" style="background: var(--c-secondary); border: none; font-weight: 700;">➕ ALTA DOCENTE</a>
+                    <?php endif; ?>
                 </div>
                 
                 <div style="margin-bottom: 2.5rem;">

@@ -14,8 +14,11 @@
 require_once 'includes/conexion.php';
 require_once 'includes/auth.php';
 
-// Solo admin puede acceder
-requiereAdmin();
+// Solo admin y estudiante pueden acceder
+if (!esAdmin() && !esEstudiante()) {
+    header('Location: login.php');
+    exit();
+}
 
 
 // ============================================================
@@ -106,7 +109,9 @@ if ($resultadoProfesores) {
             <?php if ($accion === 'listar'): ?>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
                     <h2 class="glow-text" style="font-size: 2.2rem; margin-bottom: 0;"><span>📚</span> Catálogo Académico</h2>
-                    <a href="?accion=crear" class="btn btn-primary" style="background: var(--c-accent); border: none; font-weight: 700;">➕ NUEVO CURSO</a>
+                    <?php if (esAdmin()): ?>
+                        <a href="?accion=crear" class="btn btn-primary" style="background: var(--c-accent); border: none; font-weight: 700;">➕ NUEVO CURSO</a>
+                    <?php endif; ?>
                 </div>
                 
                 <div style="margin-bottom: 2.5rem;">

@@ -39,6 +39,14 @@ function esProfesor() {
 }
 
 /**
+ * Verifica si el usuario es estudiante
+ * @return bool
+ */
+function esEstudiante() {
+    return estaAutenticado() && $_SESSION['usuario_rol'] === 'estudiante';
+}
+
+/**
  * Redirige al login si no esta autenticado
  */
 function requiereLogin() {
@@ -124,9 +132,20 @@ function autenticarUsuario($conexion, $username, $password) {
  * @param array $usuario
  */
 function iniciarSesionUsuario($usuario) {
+    global $conexion;
     $_SESSION['usuario_id'] = $usuario['id_usuario'];
     $_SESSION['usuario_nombre'] = $usuario['nombre_completo'];
     $_SESSION['usuario_rol'] = $usuario['rol'];
     $_SESSION['usuario_username'] = $usuario['username'];
+    
+    // Si es estudiante, obtener su curso para filtrado posterior
+    if ($usuario['rol'] === 'estudiante' && !empty($usuario['id_estudiante'])) {
+        $id_estu = $usuario['id_estudiante'];
+        $res = $conexion->query("SELECT id_curso FROM estudiantes WHERE id_estudiante = $id_estu");
+        if ($res && $res->num_rows > 0) {
+            $estu_data = $res->fetch_assoc();
+            $_SESSION['estudiante_id_curso'] = $estu_data['id_curso'];
+        }
+    }
 }
 ?>
